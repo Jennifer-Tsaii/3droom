@@ -9,6 +9,7 @@ float leftRightHeadAngle, upDownHeadAngle;
 //robot
 import java.awt.Robot;
 Robot rbt;
+boolean skipFrame;
 
 //colour pallette
 color white = #FFFFFF; //empty space 
@@ -46,6 +47,7 @@ void setup() {
   catch(Exception e) {
     e.printStackTrace();
   }
+  skipFrame = false;
 
   //map
   map = loadImage("map.png");
@@ -66,8 +68,6 @@ void draw() {
   drawFocalPoint();
   controlCamera();
   drawMap();
-  
-  //lights
   
 }
 
@@ -96,17 +96,6 @@ void drawFocalPoint() {
   popMatrix();
 }
 
-//void drawFloor() {
-//  stroke(255);
-//  for (int x = -2000; x <= 2000; x = x + 100) {
-
-//    line(x, height, -2000, x, height, 2000);
-//    line(-2000, height, x, 2000, height, x);
-//    //ceiling
-//    line(x, height-gridSize*4, -2000, x, height-gridSize*4, 2000);
-//    line(-2000, height-gridSize*4, x, 2000, height-gridSize*4, x);
-//  }
-//}
 
 void drawFloor(int start, int end, int level, int gap) {
   stroke(255);
@@ -122,8 +111,6 @@ void drawFloor(int start, int end, int level, int gap) {
     }
   }
 }
-
-
 
 void controlCamera() {
   if (wkey) {
@@ -142,18 +129,27 @@ void controlCamera() {
     eyeX = eyeX + cos(leftRightHeadAngle - PI/2)*10;
     eyeZ = eyeZ + sin(leftRightHeadAngle - PI/2)*10;
   }
-
+ 
+  if (skipFrame == false) {
   leftRightHeadAngle = leftRightHeadAngle + (mouseX - pmouseX)*0.01;
   upDownHeadAngle = upDownHeadAngle + (mouseY - pmouseY)*0.01;
+  }
   if (upDownHeadAngle > PI/2.5) upDownHeadAngle = PI/2.5;
   if (upDownHeadAngle < -PI/2.5) upDownHeadAngle = -PI/2.5;
 
   focusX = eyeX + cos(leftRightHeadAngle)*300;
   focusZ = eyeZ + sin(leftRightHeadAngle)*300;
   focusY = eyeY + tan(upDownHeadAngle)*300;
-
-  if (mouseX > width-2) rbt.mouseMove(2, mouseY);
-  else if (mouseX < 2) rbt.mouseMove(width-2, mouseY);
+  
+  if (mouseX < 2) {
+    rbt.mouseMove(width-3, mouseY);
+    skipFrame = false;
+  } else if (mouseX > width-2) {
+    rbt.mouseMove(2, mouseY);
+    skipFrame = true;
+  } else {
+    skipFrame = false;
+  }
 } 
 
 void keyPressed() {
